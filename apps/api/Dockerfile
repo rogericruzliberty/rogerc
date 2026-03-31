@@ -29,6 +29,9 @@ COPY package.json ./
 COPY prisma/ ./prisma/
 RUN npm install --omit=dev
 
+# Copy generated Prisma client from build stage (prisma CLI is a devDep)
+COPY --from=base /app/node_modules/.prisma ./node_modules/.prisma
+
 # Copy compiled JS from build stage
 COPY --from=base /app/dist ./dist
 
