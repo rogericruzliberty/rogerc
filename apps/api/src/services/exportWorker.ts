@@ -212,10 +212,9 @@ export const exportWorker = new Worker<ExportJobData, ExportJobResult>(
     return { driveFileId: fileId, downloadLink, folderName };
   },
   {
-    connection: {
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-    },
+    connection: process.env.REDIS_URL
+            ? (() => { const u = new URL(process.env.REDIS_URL); return { host: u.hostname, port: parseInt(u.port || '6379'), password: u.password || undefined }; })()
+            : { host: process.env.REDIS_HOST || 'localhost', port: parseInt(process.env.REDIS_PORT || '6379') },
     concurrency: 2,
   },
 );
