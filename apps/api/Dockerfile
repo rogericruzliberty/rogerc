@@ -1,6 +1,9 @@
 # Liberty Field App — API Dockerfile
 FROM node:20-alpine AS base
 
+# OpenSSL needed for Prisma
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
 # Copy prisma schema FIRST so postinstall (prisma generate) can find it
@@ -15,6 +18,10 @@ RUN npx tsc
 
 # Production stage
 FROM node:20-alpine AS production
+
+# OpenSSL needed for Prisma
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
 # Again, copy prisma before npm install so postinstall works
