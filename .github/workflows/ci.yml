@@ -1,0 +1,109 @@
+# Liberty Field App — CI/CD Pipeline
+#
+# Runs on push to main/release branches.
+# - Lint + test for both mobile and API
+# - Build mobile via EAS (iOS + Android)
+# - Build and deploy API Docker image
+
+name: CI/CD
+
+on:
+  push:
+    branches: [main, 'release/*']
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ─── Lint & Test ─────────────────────────
+  lint-and-test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint --workspaces
+
+      - name: Type Check
+        run: npm run typecheck --workspaces
+
+      - name: Unit Tests
+        run: npm run test --workspaces -- --coverage
+
+      - name: Upload Coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            apps/mobile/coverage/
+            apps/api/coverage/
+
+  # ─── Build Mobile (EAS) ─────────────────
+  build-mobile:
+    name: Build Mobile (${{ matrix.platform }})
+    needs: lint-and-test
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [ios, android]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - run: npm ci
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build with EAS
+        working-directory: apps/mobile
+        run: |
+          PROFILE="internal"
+          if [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
+            PROFILE="production"
+          fi
+          eas build --platform ${{ matrix.platform }} --profile $PROFILE --non-interactive
+
+  # ─── Build & Deploy API ─────────────────
+  deploy-api:
+    name: Deploy API
+    needs: lint-and-test
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        working-directory: apps/api
+        run: |
+          docker build -t liberty-field-api:${{ github.sha }} .
+          docker tag liberty-field-api:${{ github.sha }} liberty-field-api:latest
+
+      - name: Push to Container Registry
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker tag liberty-field-api:latest ${{ secrets.DOCKER_REGISTRY }}/liberty-field-api:latest
+          docker tag liberty-field-api:${{ github.sha }} ${{ secrets.DOCKER_REGISTRY }}/liberty-field-api:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_REGISTRY }}/liberty-field-api:latest
+          docker push ${{ secrets.DOCKER_REGISTRY }}/liberty-field-api:${{ github.sha }}
+
+      # Deploy to Railway/Fly.io/ECS (configure per your hosting)
+      # - name: Deploy to Railway
+      #   run: railway up --service api
