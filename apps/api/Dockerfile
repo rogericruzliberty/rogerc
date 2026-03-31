@@ -2,27 +2,28 @@
 FROM node:20-alpine AS base
 
 WORKDIR /app
+
+# Copy prisma schema FIRST so postinstall (prisma generate) can find it
 COPY package.json ./
+COPY prisma/ ./prisma/
 RUN npm install
 
-COPY prisma/ ./prisma/
-RUN npx prisma generate
-
+# Build TypeScript
 COPY tsconfig.json ./
 COPY src/ ./src/
-RUN npm run build
+RUN npx tsc
 
 # Production stage
 FROM node:20-alpine AS production
 WORKDIR /app
 
+# Again, copy prisma before npm install so postinstall works
 COPY package.json ./
+COPY prisma/ ./prisma/
 RUN npm install --omit=dev
 
-COPY --from=base /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=base /app/node_modules/@prisma ./node_modules/@prisma
+# Copy compiled JS from build stage
 COPY --from=base /app/dist ./dist
-COPY --from=base /app/prisma ./prisma
 
 ENV NODE_ENV=production
 EXPOSE 3000
