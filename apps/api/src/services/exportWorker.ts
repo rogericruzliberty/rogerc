@@ -138,15 +138,15 @@ export const exportWorker = new Worker<ExportJobData, ExportJobResult>(
         ? { lat: submission.locationLat, lng: submission.locationLng }
         : null,
       answers: answersMap,
-      contacts: submission.contacts.map((c) => ({
+      contacts: submission.contacts.map((c: any) => ({
         name: c.name, title: c.title, phone: c.phone,
         email: c.email, company: c.company, role_type: c.roleType,
       })),
       attachments: {
-        photos: submission.attachments.filter((a) => a.type === 'PHOTO').map((a) => a.filename),
-        videos: submission.attachments.filter((a) => a.type === 'VIDEO').map((a) => a.filename),
-        audio: submission.attachments.filter((a) => a.type === 'AUDIO').map((a) => a.filename),
-        documents: submission.attachments.filter((a) => a.type === 'DOCUMENT').map((a) => a.filename),
+        photos: submission.attachments.filter((a: any) => a.type === 'PHOTO').map((a: any) => a.filename),
+        videos: submission.attachments.filter((a: any) => a.type === 'VIDEO').map((a: any) => a.filename),
+        audio: submission.attachments.filter((a: any) => a.type === 'AUDIO').map((a: any) => a.filename),
+        documents: submission.attachments.filter((a: any) => a.type === 'DOCUMENT').map((a: any) => a.filename),
       },
     };
 
@@ -157,7 +157,7 @@ export const exportWorker = new Worker<ExportJobData, ExportJobResult>(
     // 7. Generate contact files
     if (submission.contacts.length > 0) {
       archive.append(
-        JSON.stringify(submission.contacts.map((c) => ({
+        JSON.stringify(submission.contacts.map((c: any) => ({
           name: c.name, title: c.title, phone: c.phone,
           email: c.email, company: c.company, role: c.roleType,
         })), null, 2),
