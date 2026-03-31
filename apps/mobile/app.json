@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "Liberty Field",
+    "slug": "liberty-field-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2e358f"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.libertycd.fieldapp",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Liberty Field needs camera access to capture site photos and videos.",
+        "NSMicrophoneUsageDescription": "Liberty Field needs microphone access to record site audio observations.",
+        "NSContactsUsageDescription": "Liberty Field needs contacts access to import building manager and vendor contact information.",
+        "NSPhotoLibraryUsageDescription": "Liberty Field needs photo library access to attach existing photos and documents.",
+        "UIBackgroundModes": ["audio"]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#2e358f"
+      },
+      "package": "com.libertycd.fieldapp",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_CONTACTS",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "ACCESS_FINE_LOCATION"
+      ]
+    },
+    "plugins": [
+      "expo-camera",
+      "expo-contacts",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Liberty Field needs microphone access to record site audio."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Liberty Field needs photo library access."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
+    }
+  }
+}

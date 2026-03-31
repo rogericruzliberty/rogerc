@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Expo
+.expo/
+apps/mobile/.expo/
+
+# iOS
+apps/mobile/ios/Pods/
+*.xcworkspace
+*.xcodeproj
+
+# Android
+apps/mobile/android/.gradle/
+apps/mobile/android/app/build/
+*.apk
+*.aab
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prisma
+apps/api/prisma/migrations/
+
+# Test
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
