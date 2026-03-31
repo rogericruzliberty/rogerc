@@ -12,7 +12,7 @@ import { db } from './database';
 
 const API_BASE_URL = __DEV__
   ? 'http://localhost:3000'
-  : 'https://api.field.libertycd.com';
+  : 'https://api-production-707d.up.railway.app';
 
 // ─── Token Storage (SQLite) ─────────────────
 
